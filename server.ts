@@ -11,7 +11,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// إعدادات السماح للواجهة بالاتصال
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
@@ -25,7 +24,6 @@ app.use((req, res, next) => {
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// إعداد التخزين مع فحص الملفات المكررة
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -49,7 +47,6 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-// 1. مسار رفع الملفات
 app.post('/api/upload', (req, res) => {
   upload.single('audioFile')(req, res, (err) => {
     if (err) {
@@ -69,7 +66,6 @@ app.post('/api/upload', (req, res) => {
   });
 });
 
-// 2. مسار جلب قائمة الملفات المرفوعة
 app.get('/api/files', (req, res) => {
   try {
     fs.readdir(uploadDir, (err, files) => {
@@ -92,7 +88,6 @@ app.get('/api/files', (req, res) => {
   }
 });
 
-// 3. مسار التفريغ المباشر (محدث لأحدث موديل)
 app.post('/api/transcribe', async (req, res) => {
   try {
     const { filename, language } = req.body;
@@ -112,7 +107,7 @@ app.post('/api/transcribe', async (req, res) => {
     const prompt = `قم بتفريغ هذا الملف الصوتي بدقة عالية جداً وبشكل احترافي. اللهجة أو اللغة المطلوبة هي: ${language}. قم باستخراج النص بالكامل مع تصحيح الأخطاء الإملائية وتنظيم الفقرات.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash', // تم استخدام الموديل المستقر
+      model: 'gemini-3.6-flash', // التحديث الجديد للموديل المستقر
       contents: [
         {
           fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
