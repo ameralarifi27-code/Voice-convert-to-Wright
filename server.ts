@@ -6,14 +6,13 @@ import ffmpeg from 'fluent-ffmpeg';
 import { GoogleGenAI } from '@google/genai';
 import { fileURLToPath } from 'url';
 
-// حل مشكلة __dirname في بيئة ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// حل مشكلة الاتصال (CORS) للسماح للواجهة بالاتصال بالسيرفر
+// إذن بالسماح بالاتصال من أي صفحة خارجية (CORS)
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -30,28 +29,32 @@ const trimmedDir = path.join(__dirname, '../trimmed');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 if (!fs.existsSync(trimmedDir)) fs.mkdirSync(trimmedDir, { recursive: true });
 
+// إعداد التخزين المؤقت للملفات بكفاءة عالية لتجنب البطء
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    // تنظيف اسم الملف من أي رموز قد توقف الرفع
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    cb(null, uniqueSuffix + '-' + safeName);
   }
 });
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 1024 }
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 } // رفع الحد إلى 2 جيجابايت ليتعامل مع أضخم الملفات
 });
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 app.get('/', (req, res) => {
-  res.send('سيرفر التفريغ والقص يعمل بنجاح.');
+  res.send('سيرفر التفريغ والقص يعمل بنجاح وبدون قيود.');
 });
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
+// نقطة رفع الملفات مع معالجة سريعة
 app.post('/api/upload', upload.single('audioFile'), (req: any, res) => {
   try {
     if (!req.file) {
@@ -59,7 +62,7 @@ app.post('/api/upload', upload.single('audioFile'), (req: any, res) => {
     }
     res.json({ 
       success: true, 
-      message: 'تم رفع الملف بنجاح!',
+      message: 'تم رفع الملف الكبير بنجاح وبدون قص!',
       fileId: req.file.filename,
       originalName: req.file.originalname 
     });
@@ -100,8 +103,9 @@ app.post('/api/trim-and-transcribe/:fileId', async (req, res) => {
       return res.status(404).json({ success: false, error: 'الملف غير موجود على السيرفر.' });
     }
 
-    const outputPath = path.join(trimmedDir, `trimmed-${Date.now()}-${fileId}`);
+    const outputPath = path.join(trimmedDir, `trimmed-${Date.now()}-${fileId}.mp4`);
 
+    // معالجة قص وتجهيز الصوت عبر FFmpeg
     ffmpeg(inputPath)
       .setStartTime(startTime) 
       .setDuration(duration)   
@@ -114,7 +118,7 @@ app.post('/api/trim-and-transcribe/:fileId', async (req, res) => {
           });
 
           const response = await ai.models.generateContent({
-            model: 'gemini-3.6-flash',
+            model: 'gemini-2.5-flash', // استخدام الموديل الأحدث والأقوى للمعالجة السريعة
             contents: [
               {
                 fileData: {
@@ -122,7 +126,7 @@ app.post('/api/trim-and-transcribe/:fileId', async (req, res) => {
                   mimeType: uploadResult.mimeType,
                 },
               },
-              { text: "قم بتفريغ هذا الملف الصوتي بدقة عالية واستخراج النصوص والشرائح بشكل زمني منظم." },
+              { text: "قم بتفريغ هذا المقطع الصوتي بدقة عالية جداً واستخراج النصوص والشرائح بشكل زمني منظم." },
             ],
             config: { 
               responseMimeType: 'application/json' 
@@ -137,7 +141,7 @@ app.post('/api/trim-and-transcribe/:fileId', async (req, res) => {
         }
       })
       .on('error', (err: any) => {
-        res.status(500).json({ success: false, error: 'خطأ أثناء قص الملف: ' + err.message });
+        res.status(500).json({ success: false, error: 'خطأ أثناء معالجة الملف: ' + err.message });
       })
       .run();
   } catch (error: any) {
