@@ -47,13 +47,11 @@
 <body>
 
     <div class="header">
-        <h1>🎙️ تفريغ الصوت الفعلي بالذكاء الاصطناعي (Gemini 3.6)</h1>
-        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">إرسال الملف الصوتي الحقيقي للنموذج وسماعه وتفريغه بدقة</p>
+        <h1>🎙️ التفريغ الصوتي الفعلي المباشر (Gemini 3.6)</h1>
+        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">استماع دقيق وتفريغ حرفي عبر الذكاء الاصطناعي دون الحاجة لـ Whisper</p>
     </div>
 
     <div class="container">
-        <!-- ملاحظة: مفتاح الـ API مدرج في سيرفر Railway، لذا تم الاستغناء عن خانة إدخاله يدوياً هنا -->
-
         <div class="form-group">
             <label>اختر الملف الصوتي لتخزينه وتفريغه:</label>
             <input type="file" id="largeAudioFile" accept="audio/*">
@@ -63,7 +61,7 @@
         <div id="msgBox" class="message"></div>
 
         <div class="files-list">
-            <h3 style="margin-top: 0; font-size: 14px;">📂 الملفات المحفوظة وأدوات الاستماع والتفريغ الفعلي:</h3>
+            <h3 style="margin-top: 0; font-size: 14px;">📂 الملفات المحفوظة وأدوات الاستماع والتفريغ:</h3>
             <div id="persistentFilesList">
                 <p style="text-align: center; color: var(--text-light); font-size: 12px;">جاري فحص الذاكرة الدائمة...</p>
             </div>
@@ -74,7 +72,7 @@
 
     <script>
         let db;
-        const dbName = "SmartAudioDatabaseRealAudio_V36";
+        const dbName = "SmartAudioDatabaseDirect_V36";
         const storeName = "files";
 
         async function requestPersistentStorage() {
@@ -142,7 +140,7 @@
             };
 
             req.onerror = function() {
-                showMessage('❌ فشل الحفظ. مساحة التخزين قد تكون غير كافية.', false);
+                showMessage('❌ فشل الحفظ. مساحة التخزين غير كافية.', false);
             };
         }
 
@@ -196,14 +194,13 @@
             };
         }
 
-        // دالة تحويل ملف الصوت إلى Base64 وإرساله فعلياً لسيرفرك في Railway (أو الاتصال المباشر)
         async function sendAudioToGemini(id, encodedName) {
             const fileName = decodeURIComponent(encodedName);
             const lang = document.getElementById(`lang-${id}`).value;
             const btn = document.getElementById(`btn-t-${id}`);
             const resBox = document.getElementById('transcriptionResult');
 
-            btn.innerText = '🎧 جاري قراءة الملف الصوتي وتحويله وإرساله لـ Gemini 3.6...';
+            btn.innerText = '🎧 جاري معالجة وإرسال الصوت إلى سيرفر Railway (Gemini 3.6)...';
             btn.disabled = true;
             resBox.style.display = 'none';
 
@@ -220,7 +217,6 @@
                 }
 
                 try {
-                    // تحويل ملف الصوت (Blob) إلى Base64 ليتمكن النموذج من سماعه ومعالجته كملف ميديا حقيقي
                     const reader = new FileReader();
                     reader.readAsDataURL(record.fileObject);
                     
@@ -228,15 +224,12 @@
                         const base64AudioData = reader.result.split(',')[1];
                         const mimeType = record.fileObject.type || 'audio/mp4';
 
-                        // ملاحظة: إذا كنت ترسل الطلب عبر مسار الخادم الخاص بك في Railway (Backend)، يمكنك تعديل هذا الرابط ليكون '/api/transcribe'
-                        // أما إذا كان التطبيق سيتصل مباشرة (مع ضرورة وجود المفتاح في الـ Backend)، فاستخدم نقطة النهاية المخصصة لديك:
-                        
                         const promptText = `قم بسماع هذا الملف الصوتي بعناية فائقة. المطلوب:
 1. تفريغ كامل ومفصل لكل كلمة نُطقت في التسجيل الحرفي (بالتركيز على ${lang}).
-2. إعادة صياغة التفريغ في جدول أو نقاط أكاديمية منظمة وواضحة لتسهيل القراءة والمراجعة الدراسية.`;
+2. إعادة صياغة التفريغ في نقاط أكاديمية منظمة وواضحة لتسهيل القراءة والمراجعة الدراسية.`;
 
-                        // إرسال الطلب متضمناً محتوى الصوت الثنائي (Inline Data)
-                        const response = await fetch('/api/gemini-analyze', { // قم بتعديل هذا الرابط إذا كان سيرفر Railway الخاص بك يستقبل الطلبات بمسار محدد، أو ضعه عبر الـ Proxy
+                        // إرسال البيانات المكونة من الصوت الخام إلى مسار الخادم في Railway
+                        const response = await fetch('/api/gemini-analyze', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -246,9 +239,6 @@
                                 mimeType: mimeType,
                                 prompt: promptText
                             })
-                        }).catch(() => {
-                            // مسار بديل في حال لم يكن هناك سيرفر وسيط وتود توجيهه مباشرة (ملاحظة: يتطلب مفتاح API)
-                            throw new Error("يرجى التأكد من توجيه الطلب إلى نقطة النهاية (Endpoint) الخاصة بسيرفر Railway الذي يحمل مفتاح الـ API.");
                         });
 
                         const data = await response.json();
@@ -257,7 +247,7 @@
                             throw new Error(data.error);
                         }
 
-                        const aiResponseText = data.result || data.candidates[0].content.parts[0].text;
+                        const aiResponseText = data.result || data.text;
 
                         resBox.innerHTML = `
                             <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الصوتي الفعلي عبر Gemini 3.6 (${lang}):</h4>
@@ -273,7 +263,7 @@
                     };
 
                 } catch (error) {
-                    alert('خطأ في تفريغ الصوت: ' + error.message);
+                    alert('خطأ في إرسال وتحليل الصوت: ' + error.message);
                 } finally {
                     btn.innerText = 'استماع وتفريغ الصوت الفعلي عبر Gemini 3.6 🎧';
                     btn.disabled = false;
