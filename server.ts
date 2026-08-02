@@ -20,28 +20,29 @@ app.use((req, res, next) => {
   next();
 });
 
-const uploadDir = path.join(__dirname, '../uploads');
-const processedDir = path.join(__dirname, '../processed');
+// استخدام مسار محلي مضمون للتخزين
+const uploadDir = path.join(process.cwd(), 'uploads');
+const processedDir = path.join(process.cwd(), 'processed');
 
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-if (!fs.existsSync(processedDir)) fs.mkdirSync(processedDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  if (!fs.existsSync(processedDir)) fs.mkdirSync(processedDir, { recursive: true });
+} catch (e) {
+  console.error("Error creating directories:", e);
+}
 
-// إعداد التخزين بمساحة واسعة وفحص الملفات المكررة
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_\u0600-\u06FF]/g, '_');
-    const filePath = path.join(uploadDir, safeName);
-    if (fs.existsSync(filePath)) {
-      return cb(new Error('FILE_ALREADY_EXISTS'), '');
-    }
+    // تنظيف اسم الملف ليدعم العربية والإنجليزية بدون مشاكل
+    const safeName = Date.now() + '_' + file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     cb(null, safeName);
   }
 });
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 * 1024 } // 2 جيجابايت
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 }
 });
 
 app.use(express.json({ limit: '100mb' }));
@@ -49,25 +50,25 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-// 1. رفع الملف
+// رفع الملف
 app.post('/api/upload', (req, res) => {
   upload.single('audioFile')(req, res, (err) => {
     if (err) {
-      if (err.message === 'FILE_ALREADY_EXISTS') {
-        return res.status(400).json({ success: false, error: 'هذا الملف موجود مسبقاً في السيرفر!' });
-      }
       return res.status(500).json({ success: false, error: err.message });
     }
-    if (!req.file) return res.status(400).json({ success: false, error: 'لم يتم رفع أي ملف.' });
-    res.json({ success: true, message: 'تم التخزين بنجاح!', filename: req.file.filename });
+    if (!req.file) return res.status(400).json({ success: false, error: 'لم يتم اختيار ملف.' });
+    res.json({ success: true, message: 'تم الرفع بنجاح!', filename: req.file.filename });
   });
 });
 
-// 2. جلب قائمة الملفات المخزنة
+// جلب قائمة الملفات
 app.get('/api/files', (req, res) => {
   try {
+    if (!fs.existsSync(uploadDir)) {
+      return res.json({ success: true, files: [] });
+    }
     fs.readdir(uploadDir, (err, files) => {
-      if (err) return res.status(500).json({ success: false, error: 'خطأ في قراءة السيرفر.' });
+      if (err) return res.status(500).json({ success: false, error: 'خطأ في قراءة المجلد.' });
       
       const fileList = files.map(file => {
         const filePath = path.join(uploadDir, file);
@@ -86,7 +87,7 @@ app.get('/api/files', (req, res) => {
   }
 });
 
-// 3. مسار التفريغ المباشر بالذكاء الاصطناعي
+// التفريغ الذكي
 app.post('/api/transcribe', async (req, res) => {
   try {
     const { filename, language } = req.body;
@@ -100,7 +101,7 @@ app.post('/api/transcribe', async (req, res) => {
 
     const prompt = `قم بتفريغ هذا الملف الصوتي بدقة واحترافية عالية. اللهجة أو اللغة المطلوبة هي: ${language}.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         { fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType } },
         { text: prompt },
@@ -113,7 +114,7 @@ app.post('/api/transcribe', async (req, res) => {
   }
 });
 
-// 4. مسار معالجة الملفات (قص وتغيير الصيغة مثل MP3 / M4A)
+// معالجة الصوت (قص أو تحويل)
 app.post('/api/process-audio', (req, res) => {
   const { filename, action, startTime, duration, targetFormat } = req.body;
   const inputPath = path.join(uploadDir, filename);
@@ -124,7 +125,6 @@ app.post('/api/process-audio', (req, res) => {
 
   let command = ffmpeg(inputPath);
 
-  // إذا طلب قص
   if (action === 'trim') {
     command = command.setStartTime(startTime).setDuration(duration);
   }
@@ -144,7 +144,7 @@ app.post('/api/process-audio', (req, res) => {
     .run();
 });
 
-// مسار تحميل الملفات المعالجة
+// تحميل الملف المعالج
 app.get('/api/download-processed/:filename', (req, res) => {
   const filePath = path.join(processedDir, req.params.filename);
   if (fs.existsSync(filePath)) {
