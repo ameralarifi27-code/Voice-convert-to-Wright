@@ -200,7 +200,7 @@
     </div>
 
     <script>
-        // ضع رابط سيرفرك في ريلواي هنا (بدون الشرطة المائلة الأخيرة /)
+        // رابط سيرفرك المباشر
         const SERVER_URL = 'https://responsible-strength-production-ece3.up.railway.app';
 
         async function uploadFile() {
@@ -271,7 +271,7 @@
                     resultBox.innerText = '❌ خطأ: ' + data.error;
                 }
             } catch (err) {
-                loader.style.display, (loader.style.display = 'none');
+                loader.style.display = 'none';
                 resultBox.innerText = '❌ خطأ في المعالجة: ' + err.message;
             }
         }
