@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// إعداد التخزين مع فحص الملفات المكررة (الطلب رقم 6)
+// إعداد التخزين مع فحص الملفات المكررة
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -93,7 +93,7 @@ app.get('/api/files', (req, res) => {
   }
 });
 
-// 3. مسار التفريغ المباشر (بدون قص وبسرعة عالية)
+// 3. مسار التفريغ المباشر (مع حل مشكلة الـ config)
 app.post('/api/transcribe', async (req, res) => {
   try {
     const { filename, language } = req.body;
@@ -103,10 +103,12 @@ app.post('/api/transcribe', async (req, res) => {
       return res.status(404).json({ success: false, error: 'الملف غير موجود.' });
     }
 
-    // رفع الملف لنموذج جيميناي مباشرة
+    // رفع الملف لنموذج جيميناي بالطريقة الصحيحة للتحديث الجديد
     const uploadResult = await ai.files.upload({
       file: filePath,
-      mimeType: 'audio/mp4', // يقبل معظم الصيغ
+      config: {
+        mimeType: 'audio/mp3', // تم وضعها داخل الـ config كما طلب الخطأ
+      }
     });
 
     const prompt = `قم بتفريغ هذا الملف الصوتي بدقة عالية جداً وبشكل احترافي. اللهجة أو اللغة المطلوبة هي: ${language}. قم باستخراج النص بالكامل مع تصحيح الأخطاء الإملائية وتنظيم الفقرات.`;
