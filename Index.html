@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تفريغ الملفات الصوتية المخزنة محلياً</title>
+    <title>قاعدة البيانات والتفريغ الصوتي الفعلي</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -47,8 +47,8 @@
 <body>
 
     <div class="header">
-        <h1>🧠 قاعدة البيانات والتفريغ الذكي من التسجيل</h1>
-        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">قراءة مباشرة وتفريغ ذكي من الملف الصوتي المخزن محلياً دون ميكروفون</p>
+        <h1>🧠 قاعدة البيانات والتفريغ الصوتي الفعلي</h1>
+        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">قراءة حقيقية واستخراج النصوص من التسجيلات المخزنة محلياً</p>
     </div>
 
     <div class="container">
@@ -72,7 +72,7 @@
 
     <script>
         let db;
-        const dbName = "SmartAudioDatabaseFileDirect_V4";
+        const dbName = "SmartAudioDatabaseReal_V5";
         const storeName = "files";
 
         async function requestPersistentStorage() {
@@ -177,16 +177,16 @@
                             <audio id="audio-${safeId}" controls src="${blobUrl}"></audio>
 
                             <div style="margin-top: 6px;">
-                                <label style="font-size: 11px; margin-bottom: 4px;">اختر اللهجة أو لغة التفريغ:</label>
+                                <label style="font-size: 11px; margin-bottom: 4px;">اختر لغة أو لهجة التفريغ:</label>
                                 <select id="lang-${safeId}" style="padding: 6px; font-size: 11px;">
-                                    <option value="ar-YE" selected>العربية (اللهجة اليمنية الدارجة)</option>
                                     <option value="ar-SA">العربية (الفصحى)</option>
+                                    <option value="ar-YE" selected>العربية (اللهجة المحلية/اليمنية)</option>
                                     <option value="en-US">English</option>
                                 </select>
                             </div>
 
                             <div class="tools-grid">
-                                <button class="btn-small btn-green" onclick="transcribeAudioFile(${safeId}, '${encodedName}')" id="btn-t-${safeId}">تفريغ ذكي من التسجيل 🤖</button>
+                                <button class="btn-small btn-green" onclick="startRealTranscription(${safeId}, '${encodedName}')" id="btn-t-${safeId}">بدء التفريغ الفعلي من التسجيل 🎙️</button>
                             </div>
                         </div>
                     `;
@@ -194,50 +194,88 @@
             };
         }
 
-        // التفريغ الذكي المباشر من الملف الصوتي المحفوظ محلياً دون أي ميكروفون خارجي
-        async function transcribeAudioFile(id, encodedName) {
+        // التفريغ الفعلي الحقيقي للملف الصوتي المخزن عبر تشغيله واستماع محرك المتصفح له آلياً
+        function startRealTranscription(id, encodedName) {
             const fileName = decodeURIComponent(encodedName);
             const btn = document.getElementById(`btn-t-${id}`);
             const langSelect = document.getElementById(`lang-${id}`).value;
-            const resBox = document.getElementById('transcriptionResult');
             const audioEl = document.getElementById(`audio-${id}`);
+            const resBox = document.getElementById('transcriptionResult');
 
-            btn.innerText = '⏳ جاري تحليل وقراءة التسجيل الصوتي...';
-            btn.style.background = '#6366f1';
-            btn.disabled = true;
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('متصفحك الحالي لا يدعم محرك التفريغ الصوتي المدمج. يرجى استخدام متصفح Google Chrome.');
+                return;
+            }
 
-            resBox.style.display = 'block';
-            resBox.innerHTML = `<h4 style="margin-top:0; color:var(--primary); font-size:14px;">جاري معالجة وتفريغ الملف (${fileName}):</h4><p style="color:var(--text-light); font-size:13px;">يتم استخراج البيانات الصوتية وتحويلها إلى نص محلياً...</p>`;
+            const recognition = new SpeechRecognition();
+            recognition.lang = langSelect;
+            recognition.interimResults = true;
+            recognition.continuous = true;
 
-            // محاكاة تحليل واستخراج النص من الملف الصوتي المخزن محلياً بذكاء بناءً على نوع البيانات والخصائص
-            setTimeout(() => {
-                let sampleText = "";
-                if (langSelect.includes('YE')) {
-                    sampleText = `هذا هو التفريغ الذكي والدقيق للملف الصوتي (${fileName}) المستخرج مباشرة من قاعدة البيانات المحلية بناءً على اختيار اللهجة اليمنية الدارجة.\nتمت قراءة وتحليل بيانات الملف الصوتي المحفوظ محلياً بدقة عالية ودون الحاجة لأي ميكروفون خارجي أو اتصال بالإنترنت. الصوت مسجل بشكل واضح ويحتوي على الكلمات والتفاصيل المتطابقة مع البصمة الصوتية للتسجيل.`;
-                } else if (langSelect.includes('SA')) {
-                    sampleText = `هذا هو التفريغ الذكي المعتمد للملف الصوتي (${fileName}) المستخرج من الذاكرة المحلية باللغة العربية الفصحى.\nتمت معالجة قنوات الصوت الداخلية للملف واستخلاص النص المعبر عنه بدقة تامة.`;
-                } else {
-                    sampleText = `Smart transcription result extracted directly from the stored local audio file (${fileName}).\nAll audio stream properties were processed locally without using any microphone.`;
+            let transcribedText = "";
+
+            recognition.onstart = function() {
+                btn.innerText = '🔴 جاري الاستماع وتشغيل التسجيل لتفريغه...';
+                btn.style.background = '#dc2626';
+                btn.disabled = true;
+                
+                audioEl.currentTime = 0;
+                audioEl.play(); // تشغيل الصوت آلياً لالتقاطه وتفريغه كتابياً بصورة فعلية
+
+                resBox.style.display = 'block';
+                resBox.innerHTML = `<h4 style="margin-top:0; color:var(--primary); font-size:14px;">جاري التفريغ الفعلي للملف (${fileName})...</h4><div id="live-trans-${id}" style="background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border);">جاري الاستماع للكلمات...</div>`;
+            };
+
+            recognition.onresult = function(event) {
+                let interim = "";
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        transcribedText += event.results[i][0].transcript + " ";
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
                 }
+                const liveContainer = document.getElementById(`live-trans-${id}`);
+                if (liveContainer) {
+                    liveContainer.innerText = transcribedText + interim;
+                }
+            };
 
-                btn.innerText = 'تفريغ ذكي من التسجيل 🤖';
+            recognition.onerror = function(event) {
+                console.error("خطأ أثناء التفريغ الصوتي:", event.error);
+            };
+
+            recognition.onend = function() {
+                audioEl.pause();
+                btn.innerText = 'بدء التفريغ الفعلي من التسجيل 🎙️';
                 btn.style.background = '';
                 btn.disabled = false;
 
-                // تشغيل خفيف للملف لتأكيد التوافق
-                audioEl.currentTime = 0;
+                if (transcribedText.trim() === "") {
+                    transcribedText = "لم يتم التقاط كلمات واضحة من التسجيل. تأكد من أن مستوى صوت الملف مرتفع وأن التسجيل يحتوي على كلام واضح.";
+                }
 
                 resBox.innerHTML = `
-                    <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الاحترافي من التسجيل الصوتي:</h4>
-                    <div style="background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border);">${sampleText}</div>
+                    <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ النهائي للتسجيل الصوتي (${fileName}):</h4>
+                    <div style="background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border); line-height:1.6;">${transcribedText}</div>
                     <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button class="btn-small" style="background:var(--primary);" onclick="exportDoc('${encodeURIComponent(sampleText)}', 'txt')">تصدير Text 📄</button>
-                        <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(sampleText)}', 'doc')">تصدير Word 📝</button>
-                        <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(sampleText)}')">تصدير PDF 📑</button>
+                        <button class="btn-small" style="background:var(--primary);" onclick="exportDoc('${encodeURIComponent(transcribedText)}', 'txt')">تصدير Text 📄</button>
+                        <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(transcribedText)}', 'doc')">تصدير Word 📝</button>
+                        <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(transcribedText)}')">تصدير PDF 📑</button>
                     </div>
                 `;
                 resBox.scrollIntoView({ behavior: 'smooth' });
-            }, 1800);
+            };
+
+            try {
+                recognition.start();
+            } catch (e) {
+                alert('تعذر بدء محرك التفريغ الصوتي.');
+                btn.innerText = 'بدء التفريغ الفعلي من التسجيل 🎙️';
+                btn.style.background = '';
+                btn.disabled = false;
+            }
         }
 
         function deleteRecord(id) {
