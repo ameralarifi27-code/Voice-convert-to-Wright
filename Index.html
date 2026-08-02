@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مركز تخزين ومعالجة الصوتيات</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- تحميل مكتبة PDF في الخلفية لتجنب تجميد الصفحة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -79,7 +80,7 @@
         <div class="files-list">
             <h3 style="margin-top: 0; font-size: 15px;">📂 قائمة الملفات المخزنة على السيرفر:</h3>
             <div id="filesList">
-                <p id="loadingFilesText" style="text-align: center; color: var(--text-light); font-size: 12px;">جاري الاتصال بالسيرفر وجلب الملفات...</p>
+                <p id="loadingFilesText" style="text-align: center; color: var(--text-light); font-size: 12px;">جاري جلب الملفات...</p>
             </div>
         </div>
 
@@ -87,12 +88,12 @@
     </div>
 
     <script>
-        // استخراج أصل السيرفر بدقة ليتوافق مع البيئة المحلية المسارية
-        const SERVER_URL = window.location.origin;
+        // استخدام مسار نسبي مباشر لتجنب مشاكل توجيه الروابط في البيئة المحلية
+        const SERVER_URL = "";
 
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(loadFiles, 100);
-        });
+        window.onload = function() {
+            loadFiles();
+        };
 
         function showMessage(id, text, success) {
             const el = document.getElementById(id);
@@ -145,7 +146,7 @@
                         fileInput.value = '';
                         loadFiles();
                     } else {
-                        showMessage('uploadMessage', '❌ خطأ: ' + res.error, false);
+                        showMessage('uploadMessage', '❌ خطأ: ' + (res.error || 'فشل الرفع'), false);
                     }
                 } catch {
                     showMessage('uploadMessage', '❌ خطأ في استجابة السيرفر', false);
@@ -154,7 +155,7 @@
 
             xhr.onerror = () => {
                 progressContainer.style.display = 'none';
-                showMessage('uploadMessage', '❌ فشل الاتصال بالسيرفر المحلي', false);
+                showMessage('uploadMessage', '❌ فشل الاتصال بالسيرفر', false);
             };
 
             xhr.send(formData);
@@ -196,7 +197,7 @@
                         </div>
                     `).join('');
                 }
-            } catch (e) {
+            } catch {
                 listDiv.innerHTML = '<p style="color: var(--error); text-align: center; font-size:12px;">تعذر الاتصال بالسيرفر لجلب الملفات.</p>';
             }
         }
