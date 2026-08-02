@@ -29,7 +29,6 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    // تنظيف اسم الملف
     const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_\u0600-\u06FF]/g, '_');
     const filePath = path.join(uploadDir, safeName);
     
@@ -42,7 +41,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 * 1024 } // رفع الحد إلى 2 جيجا
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 }
 });
 
 app.use(express.json({ limit: '100mb' }));
@@ -84,7 +83,7 @@ app.get('/api/files', (req, res) => {
           size: (stats.size / (1024 * 1024)).toFixed(2) + ' MB',
           createdAt: stats.birthtime
         };
-      }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // الأحدث أولاً
+      }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       
       res.json({ success: true, files: fileList });
     });
@@ -93,7 +92,7 @@ app.get('/api/files', (req, res) => {
   }
 });
 
-// 3. مسار التفريغ المباشر (مع حل مشكلة الـ config)
+// 3. مسار التفريغ المباشر (محدث لأحدث موديل)
 app.post('/api/transcribe', async (req, res) => {
   try {
     const { filename, language } = req.body;
@@ -103,18 +102,17 @@ app.post('/api/transcribe', async (req, res) => {
       return res.status(404).json({ success: false, error: 'الملف غير موجود.' });
     }
 
-    // رفع الملف لنموذج جيميناي بالطريقة الصحيحة للتحديث الجديد
     const uploadResult = await ai.files.upload({
       file: filePath,
       config: {
-        mimeType: 'audio/mp3', // تم وضعها داخل الـ config كما طلب الخطأ
+        mimeType: 'audio/mp3',
       }
     });
 
     const prompt = `قم بتفريغ هذا الملف الصوتي بدقة عالية جداً وبشكل احترافي. اللهجة أو اللغة المطلوبة هي: ${language}. قم باستخراج النص بالكامل مع تصحيح الأخطاء الإملائية وتنظيم الفقرات.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-flash', // تم استخدام الموديل المستقر
       contents: [
         {
           fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
