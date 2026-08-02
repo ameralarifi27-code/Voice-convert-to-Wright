@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التخزين والمعالجة الصوتية</title>
+    <title>مركز تخزين ومعالجة الصوتيات</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -87,10 +87,9 @@
     </div>
 
     <script>
-        // التحديد التلقائي لرابط السيرفر بناءً على البورت المفتوح حالياً في متصفحك
-        const SERVER_URL = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:26008';
+        // استخراج أصل السيرفر بدقة ليتوافق مع البيئة المحلية المسارية
+        const SERVER_URL = window.location.origin;
 
-        // تشغيل جلب الملفات بعد تحميل الصفحة فوراً بدون تعطيل الواجهة
         document.addEventListener("DOMContentLoaded", () => {
             setTimeout(loadFiles, 100);
         });
@@ -164,11 +163,7 @@
         async function loadFiles() {
             const listDiv = document.getElementById('filesList');
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // مهلة أقصاها 8 ثوانٍ لتجنب التعليق
-
-                const res = await fetch(`${SERVER_URL}/api/files`, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                const res = await fetch(`${SERVER_URL}/api/files`);
                 const data = await res.json();
                 
                 if (data.success) {
@@ -202,7 +197,7 @@
                     `).join('');
                 }
             } catch (e) {
-                listDiv.innerHTML = '<p style="color: var(--error); text-align: center; font-size:12px;">تعذر الاتصال بالسيرفر لجلب الملفات، تأكد من تشغيله.</p>';
+                listDiv.innerHTML = '<p style="color: var(--error); text-align: center; font-size:12px;">تعذر الاتصال بالسيرفر لجلب الملفات.</p>';
             }
         }
 
