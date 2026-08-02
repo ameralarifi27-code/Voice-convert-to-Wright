@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التفريغ الصوتي الذكي المباشر (Gemini 3.6)</title>
+    <title>مركز تخزين ومعالجة الصوتيات</title>
+    <!-- تحميل مكتبة PDF في الخلفية لتجنب تجميد الصفحة -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -21,54 +22,65 @@
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: var(--primary); font-size: 20px; font-weight: 800; margin: 0; }
+        .header h1 { color: var(--primary); font-size: 22px; font-weight: 800; margin: 0; }
         .container { width: 100%; max-width: 850px; background: var(--card-bg); padding: 20px; border-radius: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
-        input[type="file"], input[type="text"], select { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 13px; background: #f9fafb; outline: none; margin-bottom: 8px; }
+        input[type="file"], select { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 13px; background: #f9fafb; outline: none; }
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: var(--primary-hover); }
+        .progress-container { display: none; margin-top: 15px; background: #f3f4f6; border-radius: 8px; padding: 12px; border: 1px solid var(--border); }
+        .progress-bar { width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; }
         .message { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; display: none; font-size: 13px; }
         .msg-success { background: #d1fae5; color: var(--success); }
         .msg-error { background: #fee2e2; color: var(--error); }
         .files-list { margin-top: 20px; border-top: 2px solid var(--border); padding-top: 15px; }
-        .file-item { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; }
+        .file-item { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; }
         .file-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .file-name { font-weight: bold; color: var(--primary); font-size: 14px; word-break: break-all; }
         .file-meta { font-size: 11px; color: var(--text-light); }
-        .tools-grid { display: flex; gap: 6px; margin-top: 6px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
-        .btn-small { padding: 10px; font-size: 12px; width: 100%; border-radius: 6px; text-align: center; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; margin-top: 6px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .btn-small { padding: 8px; font-size: 11px; width: auto; border-radius: 6px; }
         .btn-green { background: var(--success); }
-        .btn-red { background: var(--error); }
-        .transcription-result { display: none; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 14px; max-height: 400px; overflow-y: auto; }
-        audio { width: 100%; margin-top: 6px; height: 35px; }
+        .btn-orange { background: #d97706; }
+        .btn-blue { background: #2563eb; }
+        .transcription-result { display: none; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 14px; max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>🎙️ نظام التفريغ الصوتي المباشر (Gemini 3.6)</h1>
-        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">استماع ومعالجة فعلية للتسجيلات الصوتية بدقة متناهية</p>
+        <h1>🎙️ مركز تخزين ومعالجة الصوتيات</h1>
+        <p style="color: var(--text-light); font-size: 13px; margin: 4px 0 0 0;">سيرفر تخزين وإدارة الملفات المحلية</p>
     </div>
 
     <div class="container">
         <div class="form-group">
-            <label>مفتاح Google Gemini API Key (يُحفظ محلياً في متصفحك للأمان):</label>
-            <input type="text" id="apiKeyInput" placeholder="أدخل مفتاح الـ API الخاص بـ Gemini هنا...">
+            <label>اختر ملف صوتي للرفع والتخزين:</label>
+            <input type="file" id="audioFile" accept="audio/*">
         </div>
 
-        <div class="form-group">
-            <label>اختر الملف الصوتي (مثل m4a أو mp3) لحفظه وتفريغه:</label>
-            <input type="file" id="largeAudioFile" accept="audio/*">
+        <button onclick="uploadFile()">رفع وتخزين الملف بالسيرفر ⬆️</button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-text">
+                <span id="uploadStatus">جاري الرفع...</span>
+                <span id="uploadPercentage">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div style="font-size: 10px; margin-top: 4px; color: var(--text-light);" id="uploadMBs">0 MB / 0 MB</div>
         </div>
 
-        <button onclick="storeLargeFile()">حفظ في قاعدة البيانات الدائمة 💾</button>
-        <div id="msgBox" class="message"></div>
+        <div id="uploadMessage" class="message"></div>
 
         <div class="files-list">
-            <h3 style="margin-top: 0; font-size: 14px;">📂 الملفات المحفوظة وأدوات التفريغ الفعلي:</h3>
-            <div id="persistentFilesList">
-                <p style="text-align: center; color: var(--text-light); font-size: 12px;">جاري فحص الذاكرة الدائمة...</p>
+            <h3 style="margin-top: 0; font-size: 15px;">📂 قائمة الملفات المخزنة على السيرفر:</h3>
+            <div id="filesList">
+                <p id="loadingFilesText" style="text-align: center; color: var(--text-light); font-size: 12px;">جاري جلب الملفات...</p>
             </div>
         </div>
 
@@ -76,231 +88,203 @@
     </div>
 
     <script>
-        let db;
-        const dbName = "SmartAudioDatabaseDirect_V36_Fix";
-        const storeName = "files";
+        // استخدام مسار نسبي مباشر لتجنب مشاكل توجيه الروابط في البيئة المحلية
+        const SERVER_URL = "";
 
         window.onload = function() {
-            const savedKey = localStorage.getItem('gemini_api_key');
-            if (savedKey) {
-                document.getElementById('apiKeyInput').value = savedKey;
-            }
+            loadFiles();
         };
 
-        const request = indexedDB.open(dbName, 1);
-
-        request.onerror = function(event) {
-            console.error("خطأ في قاعدة البيانات", event);
-        };
-
-        request.onsuccess = function(event) {
-            db = event.target.result;
-            loadPersistentFiles();
-        };
-
-        request.onupgradeneeded = function(event) {
-            db = event.target.result;
-            if (!db.objectStoreNames.contains(storeName)) {
-                db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
-            }
-        };
-
-        function showMessage(text, success) {
-            const box = document.getElementById('msgBox');
-            box.innerText = text;
-            box.className = 'message ' + (success ? 'msg-success' : 'msg-error');
-            box.style.display = 'block';
-            setTimeout(() => box.style.display = 'none', 4000);
+        function showMessage(id, text, success) {
+            const el = document.getElementById(id);
+            el.innerText = text;
+            el.className = 'message ' + (success ? 'msg-success' : 'msg-error');
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
         }
 
-        function storeLargeFile() {
-            const input = document.getElementById('largeAudioFile');
-            if (input.files.length === 0) {
-                alert('الرجاء اختيار ملف صوتي أولاً.');
+        function uploadFile() {
+            const fileInput = document.getElementById('audioFile');
+            if (fileInput.files.length === 0) {
+                alert('الرجاء اختيار ملف أولاً.');
                 return;
             }
 
-            const file = input.files[0];
-            showMessage('⏳ جاري حفظ الملف الصوتي في الذاكرة الدائمة...', true);
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('audioFile', file);
 
-            const transaction = db.transaction([storeName], "readwrite");
-            const store = transaction.objectStore(storeName);
-            
-            const fileRecord = {
-                name: file.name,
-                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-                fileObject: file,
-                date: new Date().toLocaleString()
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const uploadPercentage = document.getElementById('uploadPercentage');
+            const uploadMBs = document.getElementById('uploadMBs');
+
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
+            uploadPercentage.innerText = '0%';
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${SERVER_URL}/api/upload`, true);
+
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    const loaded = (e.loaded / (1024*1024)).toFixed(2);
+                    const total = (e.total / (1024*1024)).toFixed(2);
+                    progressFill.style.width = pct + '%';
+                    uploadPercentage.innerText = pct + '%';
+                    uploadMBs.innerText = `${loaded} MB / ${total} MB`;
+                }
             };
 
-            const req = store.add(fileRecord);
-
-            req.onsuccess = function() {
-                showMessage('✅ تم حفظ الملف بنجاح!', true);
-                input.value = '';
-                loadPersistentFiles();
+            xhr.onload = function() {
+                setTimeout(() => progressContainer.style.display = 'none', 1000);
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && res.success) {
+                        showMessage('uploadMessage', '✅ تم تخزين الملف بنجاح!', true);
+                        fileInput.value = '';
+                        loadFiles();
+                    } else {
+                        showMessage('uploadMessage', '❌ خطأ: ' + (res.error || 'فشل الرفع'), false);
+                    }
+                } catch {
+                    showMessage('uploadMessage', '❌ خطأ في استجابة السيرفر', false);
+                }
             };
 
-            req.onerror = function() {
-                showMessage('❌ فشل الحفظ. مساحة التخزين غير كافية.', false);
+            xhr.onerror = () => {
+                progressContainer.style.display = 'none';
+                showMessage('uploadMessage', '❌ فشل الاتصال بالسيرفر', false);
             };
+
+            xhr.send(formData);
         }
 
-        function loadPersistentFiles() {
-            const listDiv = document.getElementById('persistentFilesList');
-            if (!db) return;
+        async function loadFiles() {
+            const listDiv = document.getElementById('filesList');
+            try {
+                const res = await fetch(`${SERVER_URL}/api/files`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    if (data.files.length === 0) {
+                        listDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); font-size:12px;">لا توجد ملفات مخزنة حالياً.</p>';
+                        return;
+                    }
 
-            const transaction = db.transaction([storeName], "readonly");
-            const store = transaction.objectStore(storeName);
-            const request = store.getAll();
-
-            request.onsuccess = function(event) {
-                const records = event.target.result;
-                if (records.length === 0) {
-                    listDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); font-size:12px;">لا توجد ملفات محفوظة حالياً.</p>';
-                    return;
-                }
-
-                listDiv.innerHTML = records.map(item => {
-                    const blobUrl = URL.createObjectURL(item.fileObject);
-                    const safeId = item.id;
-                    const encodedName = encodeURIComponent(item.name);
-
-                    return `
-                        <div class="file-item" id="item-${safeId}">
+                    listDiv.innerHTML = data.files.map(file => `
+                        <div class="file-item">
                             <div class="file-header">
                                 <div>
-                                    <div class="file-name">${item.name}</div>
-                                    <div class="file-meta">الحجم: ${item.size} | الحفظ: ${item.date}</div>
+                                    <div class="file-name">${file.filename}</div>
+                                    <div class="file-meta">الحجم: ${file.size}</div>
                                 </div>
-                                <button class="btn-small btn-red" onclick="deleteRecord(${safeId})" style="width:auto; padding:4px 8px; font-size:10px;">حذف 🗑️</button>
-                            </div>
-
-                            <audio controls src="${blobUrl}"></audio>
-
-                            <div style="margin-top: 6px;">
-                                <label style="font-size: 11px; margin-bottom: 4px;">اختر اللهجة أو لغة التفريغ:</label>
-                                <select id="lang-${safeId}" style="padding: 6px; font-size: 11px;">
-                                    <option value="اللهجة اليمنية الدارجة" selected>العربية (اللهجة اليمنية الدارجة حرفياً)</option>
-                                    <option value="اللغة العربية الفصحى الأكاديمية">العربية (الفصحى الأكاديمية)</option>
-                                    <option value="English">English</option>
+                                <select id="lang-${file.filename}" style="width: 140px; padding: 5px; font-size: 11px;">
+                                    <option value="اللغة العربية الفصحى">عربي (فصحى)</option>
+                                    <option value="اللهجة اليمنية الدارجة" selected>عربي (لهجة يمنية)</option>
+                                    <option value="اللهجة المصرية">عربي (مصرية)</option>
+                                    <option value="اللغة الإنجليزية (English)">English</option>
                                 </select>
                             </div>
 
                             <div class="tools-grid">
-                                <button class="btn-small btn-green" onclick="sendAudioDirectly(${safeId}, '${encodedName}')" id="btn-t-${safeId}">استماع وتفريغ الصوت الفعلي عبر Gemini 3.6 🎧</button>
+                                <button class="btn-small btn-green" onclick="transcribe('${file.filename}')" id="btn-t-${file.filename}">تفريغ ذكي 🤖</button>
+                                <button class="btn-small btn-orange" onclick="convertFormat('${file.filename}', 'mp3')">تحويل MP3 🎵</button>
+                                <button class="btn-small btn-orange" onclick="convertFormat('${file.filename}', 'm4a')">تحويل M4A 🎧</button>
+                                <button class="btn-small btn-blue" onclick="promptTrim('${file.filename}')">قص الصوت ✂️</button>
                             </div>
                         </div>
-                    `;
-                }).join('');
-            };
+                    `).join('');
+                }
+            } catch {
+                listDiv.innerHTML = '<p style="color: var(--error); text-align: center; font-size:12px;">تعذر الاتصال بالسيرفر لجلب الملفات.</p>';
+            }
         }
 
-        // دالة الاتصال المباشر بنموذج جيمناي لمعالجة وسائط الصوت بدقة
-        async function sendAudioDirectly(id, encodedName) {
-            const fileName = decodeURIComponent(encodedName);
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
-            const lang = document.getElementById(`lang-${id}`).value;
-            const btn = document.getElementById(`btn-t-${id}`);
+        async function transcribe(filename) {
+            const btn = document.getElementById(`btn-t-${filename}`);
+            const lang = document.getElementById(`lang-${filename}`).value;
             const resBox = document.getElementById('transcriptionResult');
 
-            if (!apiKey) {
-                alert('الرجاء إدخال مفتاح Google Gemini API Key في الحقل بالأعلى أولاً.');
-                return;
-            }
-
-            localStorage.setItem('gemini_api_key', apiKey);
-
-            btn.innerText = '🎧 جاري رفع وسائط الصوت ومعالجتها عبر Gemini 3.6...';
+            btn.innerText = 'جاري...';
             btn.disabled = true;
             resBox.style.display = 'none';
 
-            const transaction = db.transaction([storeName], "readonly");
-            const store = transaction.objectStore(storeName);
-            const req = store.get(id);
+            try {
+                const res = await fetch(`${SERVER_URL}/api/transcribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, language: lang })
+                });
+                const data = await res.json();
 
-            req.onsuccess = async function(event) {
-                const record = event.target.result;
-                if (!record) {
-                    alert('الملف غير موجود.');
-                    btn.disabled = false;
-                    return;
+                if (data.success) {
+                    const txt = data.text;
+                    resBox.innerHTML = `
+                        <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الاحترافي:</h4>
+                        <div>${txt}</div>
+                        <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button class="btn-small" onclick="exportDoc('${encodeURIComponent(txt)}', 'txt')">تصدير Text 📄</button>
+                            <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(txt)}', 'doc')">تصدير Word 📝</button>
+                            <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(txt)}')">تصدير PDF 📑</button>
+                        </div>
+                    `;
+                    resBox.style.display = 'block';
+                    resBox.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('خطأ: ' + data.error);
                 }
-
-                try {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(record.fileObject);
-                    
-                    reader.onloadend = async function() {
-                        const base64Data = reader.result.split(',')[1];
-                        let mimeType = record.fileObject.type;
-                        if (!mimeType) {
-                            mimeType = 'audio/mp4'; // قيمة افتراضية لملفات m4a التسجيلية
-                        }
-
-                        const promptText = `قم بسماع هذا الملف الصوتي بعناية فائقة وتحليله. المطلوب:
-1. تفريغ كامل ومفصل لكل كلمة نُطقت في التسجيل الحرفي (بالتركيز على ${lang}).
-2. إعادة صياغة التفريغ في نقاط أو جدول أكاديمي منظم وواضح لتسهيل القراءة والمراجعة.`;
-
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                contents: [{
-                                : [
-                                        { text: promptText },
-                                        {
-                                            inline_data: {
-                                                mime_type: mimeType,
-                                                data: base64Data
-                                            }
-                                        }
-                                    ]
-                                }]
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.error) {
-                            throw new Error(data.error.message);
-                        }
-
-                        const aiResponseText = data.candidates[0].content.parts[0].text;
-
-                        resBox.innerHTML = `
-                            <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الصوتي الفعلي عبر Gemini 3.6 (${lang}):</h4>
-                            <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border); line-height:1.7;">${aiResponseText.replace(/\n/g, '<br>')}</div>
-                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
-                                <button class="btn-small" style="background:var(--primary);" onclick="exportDoc('${encodeURIComponent(aiResponseText)}', 'txt')">تصدير Text 📄</button>
-                                <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(aiResponseText)}', 'doc')">تصدير Word 📝</button>
-                                <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(aiResponseText)}')">تصدير PDF 📑</button>
-                            </div>
-                        `;
-                        resBox.style.display = 'block';
-                        resBox.scrollIntoView({ behavior: 'smooth' });
-                    };
-
-                } catch (error) {
-                    alert('خطأ في الاتصال بنموذج جيمناي: ' + error.message);
-                } finally {
-                    btn.innerText = 'استماع وتفريغ الصوت الفعلي عبر Gemini 3.6 🎧';
-                    btn.disabled = false;
-                }
-            };
+            } catch {
+                alert('حدث خطأ أثناء التفريغ.');
+            } finally {
+                btn.innerText = 'تفريغ ذكي 🤖';
+                btn.disabled = false;
+            }
         }
 
-        function deleteRecord(id) {
-            if (!confirm('هل تريد حذف هذا الملف من الذاكرة الدائمة؟')) return;
-            const transaction = db.transaction([storeName], "readwrite");
-            const store = transaction.objectStore(storeName);
-            const req = store.delete(id);
+        async function convertFormat(filename, format) {
+            if(!confirm(`تحويل إلى ${format.toUpperCase()}؟`)) return;
+            try {
+                const res = await fetch(`${SERVER_URL}/api/process-audio`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, action: 'convert', targetFormat: format })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('✅ تمت المعالجة بنجاح! سيتم التحميل الآن.');
+                    window.location.href = SERVER_URL + data.downloadUrl;
+                } else {
+                    alert('خطأ: ' + data.error);
+                }
+            } catch {
+                alert('فشل الاتصال.');
+            }
+        }
 
-            req.onsuccess = function() {
-                loadPersistentFiles();
-            };
+        async function promptTrim(filename) {
+            const start = prompt('وقت البداية بالثواني (مثلاً 0):', '0');
+            if(start === null) return;
+            const duration = prompt('المدة المطلوبة بالثواني (مثلاً 30):', '30');
+            if(duration === null) return;
+
+            try {
+                const res = await fetch(`${SERVER_URL}/api/process-audio`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, action: 'trim', startTime: Number(start), duration: Number(duration), targetFormat: 'mp3' })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('✅ تم القص بنجاح! سيتم التحميل.');
+                    window.location.href = SERVER_URL + data.downloadUrl;
+                } else {
+                    alert('خطأ: ' + data.error);
+                }
+            } catch {
+                alert('فشل الاتصال.');
+            }
         }
 
         function exportDoc(encoded, type) {
@@ -308,11 +292,11 @@
             let blob, name;
             if(type === 'txt') {
                 blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-                name = 'RealAudio_Transcription.txt';
+                name = 'Transcription.txt';
             } else {
                 const html = `<html dir="rtl"><head><meta charset="utf-8"></head><body style="font-family:Arial;font-size:15px;">${text.replace(/\n/g,'<br>')}</body></html>`;
                 blob = new Blob(['\ufeff', html], {type: 'application/msword'});
-                name = 'RealAudio_Transcription.doc';
+                name = 'Transcription.doc';
             }
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -328,8 +312,9 @@
             doc.setFontSize(14);
             const split = doc.splitTextToSize(text, 180);
             doc.text(split, 15, 20);
-            doc.save("RealAudio_Transcription.pdf");
+            doc.save("Transcription.pdf");
         }
     </script>
 </body>
 </html>
+
