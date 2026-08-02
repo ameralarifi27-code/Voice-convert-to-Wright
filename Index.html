@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قاعدة البيانات والتفريغ الذكي (Gemini 3.6)</title>
+    <title>قاعدة البيانات والتفريغ الصوتي الفعلي (Gemini 3.6)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -25,7 +25,7 @@
         .container { width: 100%; max-width: 850px; background: var(--card-bg); padding: 20px; border-radius: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
-        input[type="file"], input[type="text"], select { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 13px; background: #f9fafb; outline: none; margin-bottom: 8px; }
+        input[type="file"], select { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 13px; background: #f9fafb; outline: none; margin-bottom: 8px; }
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: var(--primary-hover); }
         .message { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; display: none; font-size: 13px; }
@@ -40,25 +40,22 @@
         .btn-small { padding: 10px; font-size: 12px; width: 100%; border-radius: 6px; text-align: center; }
         .btn-green { background: var(--success); }
         .btn-red { background: var(--error); }
-        .transcription-result { display: none; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 14px; max-height: 300px; overflow-y: auto; }
+        .transcription-result { display: none; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 14px; max-height: 400px; overflow-y: auto; }
         audio { width: 100%; margin-top: 6px; height: 35px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>🧠 قاعدة البيانات والتفريغ الذكي (Gemini 3.6)</h1>
-        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">تحليل وتفريغ الملفات باستخدام أحدث نموذج Gemini 3.6 Flash</p>
+        <h1>🎙️ تفريغ الصوت الفعلي بالذكاء الاصطناعي (Gemini 3.6)</h1>
+        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">إرسال الملف الصوتي الحقيقي للنموذج وسماعه وتفريغه بدقة</p>
     </div>
 
     <div class="container">
-        <div class="form-group">
-            <label>مفتاح Google Gemini API Key:</label>
-            <input type="text" id="apiKeyInput" placeholder="أدخل مفتاح الـ API الخاص بـ Gemini هنا...">
-        </div>
+        <!-- ملاحظة: مفتاح الـ API مدرج في سيرفر Railway، لذا تم الاستغناء عن خانة إدخاله يدوياً هنا -->
 
         <div class="form-group">
-            <label>اختر ملفاً صوتياً (لحفظه في قاعدة البيانات):</label>
+            <label>اختر الملف الصوتي لتخزينه وتفريغه:</label>
             <input type="file" id="largeAudioFile" accept="audio/*">
         </div>
 
@@ -66,7 +63,7 @@
         <div id="msgBox" class="message"></div>
 
         <div class="files-list">
-            <h3 style="margin-top: 0; font-size: 14px;">📂 الملفات المحفوظة وأدوات التحليل:</h3>
+            <h3 style="margin-top: 0; font-size: 14px;">📂 الملفات المحفوظة وأدوات الاستماع والتفريغ الفعلي:</h3>
             <div id="persistentFilesList">
                 <p style="text-align: center; color: var(--text-light); font-size: 12px;">جاري فحص الذاكرة الدائمة...</p>
             </div>
@@ -77,15 +74,8 @@
 
     <script>
         let db;
-        const dbName = "SmartAudioDatabaseGemini_V36";
+        const dbName = "SmartAudioDatabaseRealAudio_V36";
         const storeName = "files";
-
-        window.onload = function() {
-            const savedKey = localStorage.getItem('gemini_api_key');
-            if (savedKey) {
-                document.getElementById('apiKeyInput').value = savedKey;
-            }
-        };
 
         async function requestPersistentStorage() {
             if (navigator.storage && navigator.storage.persist) {
@@ -131,7 +121,7 @@
             }
 
             const file = input.files[0];
-            showMessage('⏳ جاري حفظ الملف في الذاكرة الدائمة...', true);
+            showMessage('⏳ جاري حفظ الملف الصوتي في الذاكرة الدائمة...', true);
 
             const transaction = db.transaction([storeName], "readwrite");
             const store = transaction.objectStore(storeName);
@@ -152,7 +142,7 @@
             };
 
             req.onerror = function() {
-                showMessage('❌ فشل الحفظ. مساحة التخزين غير كافية.', false);
+                showMessage('❌ فشل الحفظ. مساحة التخزين قد تكون غير كافية.', false);
             };
         }
 
@@ -189,16 +179,16 @@
                             <audio controls src="${blobUrl}"></audio>
 
                             <div style="margin-top: 6px;">
-                                <label style="font-size: 11px; margin-bottom: 4px;">اختر اللهجة أو لغة التحليل:</label>
+                                <label style="font-size: 11px; margin-bottom: 4px;">اختر اللهجة أو لغة التفريغ الفعلي:</label>
                                 <select id="lang-${safeId}" style="padding: 6px; font-size: 11px;">
-                                    <option value="اللهجة اليمنية الدارجة" selected>العربية (اللهجة اليمنية الدارجة)</option>
-                                    <option value="اللغة العربية الفصحى">العربية (الفصحى)</option>
-                                    <option value="اللغة الإنجليزية">English</option>
+                                    <option value="اللهجة اليمنية الدارجة" selected>العربية (اللهجة اليمنية الدارجة حرفياً)</option>
+                                    <option value="اللغة العربية الفصحى الأكاديمية">العربية (الفصحى الأكاديمية)</option>
+                                    <option value="English">English</option>
                                 </select>
                             </div>
 
                             <div class="tools-grid">
-                                <button class="btn-small btn-green" onclick="sendToGemini(${safeId}, '${encodedName}')" id="btn-t-${safeId}">تحليل عبر Gemini 3.6 🚀</button>
+                                <button class="btn-small btn-green" onclick="sendAudioToGemini(${safeId}, '${encodedName}')" id="btn-t-${safeId}">استماع وتفريغ الصوت الفعلي عبر Gemini 3.6 🎧</button>
                             </div>
                         </div>
                     `;
@@ -206,22 +196,14 @@
             };
         }
 
-        // الاتصال بنموذج Gemini 3.6 الفعلي عبر الـ API
-        async function sendToGemini(id, encodedName) {
+        // دالة تحويل ملف الصوت إلى Base64 وإرساله فعلياً لسيرفرك في Railway (أو الاتصال المباشر)
+        async function sendAudioToGemini(id, encodedName) {
             const fileName = decodeURIComponent(encodedName);
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
             const lang = document.getElementById(`lang-${id}`).value;
             const btn = document.getElementById(`btn-t-${id}`);
             const resBox = document.getElementById('transcriptionResult');
 
-            if (!apiKey) {
-                alert('الرجاء إدخال مفتاح Google Gemini API Key بالأعلى أولاً.');
-                return;
-            }
-
-            localStorage.setItem('gemini_api_key', apiKey);
-
-            btn.innerText = '🚀 جاري الاتصال بـ Gemini 3.6 وتحليل البيانات...';
+            btn.innerText = '🎧 جاري قراءة الملف الصوتي وتحويله وإرساله لـ Gemini 3.6...';
             btn.disabled = true;
             resBox.style.display = 'none';
 
@@ -238,45 +220,62 @@
                 }
 
                 try {
-                    const promptText = `قم بصياغة وتفريغ وتحليل احترافي لملف صوتي باسم "${fileName}" بالـ (${lang}). يرجى كتابة ملخص تفصيلي ومنظم للنقاط العلمية أو الأكاديمية لتكون جاهزة للمراجعة.`;
+                    // تحويل ملف الصوت (Blob) إلى Base64 ليتمكن النموذج من سماعه ومعالجته كملف ميديا حقيقي
+                    const reader = new FileReader();
+                    reader.readAsDataURL(record.fileObject);
+                    
+                    reader.onloadend = async function() {
+                        const base64AudioData = reader.result.split(',')[1];
+                        const mimeType = record.fileObject.type || 'audio/mp4';
 
-                    // استخدام أحدث إصدار gemini-3.6-flash في مسار الطلب
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: promptText }]
-                            }]
-                        })
-                    });
+                        // ملاحظة: إذا كنت ترسل الطلب عبر مسار الخادم الخاص بك في Railway (Backend)، يمكنك تعديل هذا الرابط ليكون '/api/transcribe'
+                        // أما إذا كان التطبيق سيتصل مباشرة (مع ضرورة وجود المفتاح في الـ Backend)، فاستخدم نقطة النهاية المخصصة لديك:
+                        
+                        const promptText = `قم بسماع هذا الملف الصوتي بعناية فائقة. المطلوب:
+1. تفريغ كامل ومفصل لكل كلمة نُطقت في التسجيل الحرفي (بالتركيز على ${lang}).
+2. إعادة صياغة التفريغ في جدول أو نقاط أكاديمية منظمة وواضحة لتسهيل القراءة والمراجعة الدراسية.`;
 
-                    const data = await response.json();
+                        // إرسال الطلب متضمناً محتوى الصوت الثنائي (Inline Data)
+                        const response = await fetch('/api/gemini-analyze', { // قم بتعديل هذا الرابط إذا كان سيرفر Railway الخاص بك يستقبل الطلبات بمسار محدد، أو ضعه عبر الـ Proxy
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                audioBase64: base64AudioData,
+                                mimeType: mimeType,
+                                prompt: promptText
+                            })
+                        }).catch(() => {
+                            // مسار بديل في حال لم يكن هناك سيرفر وسيط وتود توجيهه مباشرة (ملاحظة: يتطلب مفتاح API)
+                            throw new Error("يرجى التأكد من توجيه الطلب إلى نقطة النهاية (Endpoint) الخاصة بسيرفر Railway الذي يحمل مفتاح الـ API.");
+                        });
 
-                    if (data.error) {
-                        throw new Error(data.error.message);
-                    }
+                        const data = await response.json();
 
-                    const aiResponseText = data.candidates[0].content.parts[0].text;
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
 
-                    resBox.innerHTML = `
-                        <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التحليل عبر Gemini 3.6 (${lang}):</h4>
-                        <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border); line-height:1.7;">${aiResponseText.replace(/\n/g, '<br>')}</div>
-                        <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button class="btn-small" style="background:var(--primary);" onclick="exportDoc('${encodeURIComponent(aiResponseText)}', 'txt')">تصدير Text 📄</button>
-                            <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(aiResponseText)}', 'doc')">تصدير Word 📝</button>
-                            <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(aiResponseText)}')">تصدير PDF 📑</button>
-                        </div>
-                    `;
-                    resBox.style.display = 'block';
-                    resBox.scrollIntoView({ behavior: 'smooth' });
+                        const aiResponseText = data.result || data.candidates[0].content.parts[0].text;
+
+                        resBox.innerHTML = `
+                            <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الصوتي الفعلي عبر Gemini 3.6 (${lang}):</h4>
+                            <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border); line-height:1.7;">${aiResponseText.replace(/\n/g, '<br>')}</div>
+                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
+                                <button class="btn-small" style="background:var(--primary);" onclick="exportDoc('${encodeURIComponent(aiResponseText)}', 'txt')">تصدير Text 📄</button>
+                                <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(aiResponseText)}', 'doc')">تصدير Word 📝</button>
+                                <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(aiResponseText)}')">تصدير PDF 📑</button>
+                            </div>
+                        `;
+                        resBox.style.display = 'block';
+                        resBox.scrollIntoView({ behavior: 'smooth' });
+                    };
 
                 } catch (error) {
-                    alert('حدث خطأ أثناء الاتصال بـ Gemini: ' + error.message);
+                    alert('خطأ في تفريغ الصوت: ' + error.message);
                 } finally {
-                    btn.innerText = 'تحليل عبر Gemini 3.6 🚀';
+                    btn.innerText = 'استماع وتفريغ الصوت الفعلي عبر Gemini 3.6 🎧';
                     btn.disabled = false;
                 }
             };
@@ -298,11 +297,11 @@
             let blob, name;
             if(type === 'txt') {
                 blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-                name = 'Gemini36_Analysis.txt';
+                name = 'RealAudio_Transcription.txt';
             } else {
                 const html = `<html dir="rtl"><head><meta charset="utf-8"></head><body style="font-family:Arial;font-size:15px;">${text.replace(/\n/g,'<br>')}</body></html>`;
                 blob = new Blob(['\ufeff', html], {type: 'application/msword'});
-                name = 'Gemini36_Analysis.doc';
+                name = 'RealAudio_Transcription.doc';
             }
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -318,7 +317,7 @@
             doc.setFontSize(14);
             const split = doc.splitTextToSize(text, 180);
             doc.text(split, 15, 20);
-            doc.save("Gemini36_Analysis.pdf");
+            doc.save("RealAudio_Transcription.pdf");
         }
     </script>
 </body>
