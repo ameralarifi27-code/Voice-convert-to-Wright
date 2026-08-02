@@ -13,6 +13,17 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// حل مشكلة الاتصال (CORS) للسماح للواجهة بالاتصال بالسيرفر
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 const uploadDir = path.join(__dirname, '../uploads');
 const trimmedDir = path.join(__dirname, '../trimmed');
 
