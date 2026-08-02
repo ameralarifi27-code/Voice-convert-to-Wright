@@ -3,277 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التفريغ والقص الذكي</title>
+    <title>منصة التفريغ الصوتي الاحترافية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #2563eb;
-            --sky-blue: #0ea5e9;
-            --success-green: #10b981;
-            --warning-orange: #f59e0b;
-            --danger-red: #ef4444;
-            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
             --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
         }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-color);
+            background-color: var(--bg-color);
+            color: var(--text-dark);
             margin: 0;
             padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            max-width: 650px;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(37, 99, 235, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        h2 {
-            color: var(--primary-blue);
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 26px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
-            color: #334155;
+            font-weight: 700;
+            color: var(--text-dark);
         }
 
-        input[type="file"], input[type="number"], input[type="text"] {
+        input[type="file"], select {
             width: 100%;
-            padding: 14px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            box-sizing: border-box;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
             font-size: 15px;
             outline: none;
-            transition: all 0.3s ease;
-            background-color: #f8fafc;
+            transition: border-color 0.3s;
+            background: #f9fafb;
         }
 
-        input[type="file"]:focus, input[type="number"]:focus, input[type="text"]:focus {
-            border-color: var(--sky-blue);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
-        }
-
-        .btn-upload {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-        }
-
-        .btn-upload:hover {
-            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-            transform: translateY(-1px);
-        }
-
-        .btn-process {
-            background: linear-gradient(135deg, var(--sky-blue) 0%, #0284c7 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
-        }
-
-        .btn-process:hover {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            transform: translateY(-1px);
+        input[type="file"]:focus, select:focus {
+            border-color: var(--primary);
         }
 
         button {
             width: 100%;
+            background: var(--primary);
+            color: white;
             border: none;
             padding: 14px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
             margin-top: 10px;
         }
 
-        .divider {
-            margin: 25px 0;
-            border: 0;
-            height: 2px;
-            background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
         }
 
-        .result-box {
-            margin-top: 25px;
-            padding: 18px;
-            background-color: #0f172a;
-            color: #38bdf8;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            white-space: pre-wrap;
-            word-break: break-all;
-            max-height: 320px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 14px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .loader {
-            text-align: center;
-            color: var(--warning-orange);
-            margin-top: 12px;
+        /* شريط التحميل الاحترافي */
+        .progress-container {
             display: none;
+            margin-top: 20px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
             font-weight: bold;
-            animation: pulse 1.5s infinite;
+            color: var(--text-dark);
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
+        .msg-success { background: #d1fae5; color: var(--success); }
+        .msg-error { background: #fee2e2; color: var(--error); }
+
+        /* قائمة الملفات المرفوعة */
+        .files-list {
+            margin-top: 30px;
+            border-top: 2px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: var(--primary);
+            word-break: break-all;
+        }
+
+        .file-meta {
             font-size: 12px;
-            font-weight: bold;
-            background-color: #d1fae5;
-            color: var(--success-green);
-            margin-bottom: 10px;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 13px;
+            width: auto;
+        }
+
+        .btn-green { background: var(--success); }
+        .btn-green:hover { background: #059669; }
+
+        /* صندوق عرض التفريغ */
+        .transcription-result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 16px;
+            max-height: 400px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
 
+    <div class="header">
+        <h1>🎙️ منصة التفريغ الصوتي</h1>
+        <p style="color: var(--text-light); margin: 0;">سرعة، دقة، واحترافية بالذكاء الاصطناعي</p>
+    </div>
+
     <div class="container">
-        <div style="text-align: center;">
-            <span class="status-badge">🟢 السيرفر متصل وجاهز</span>
-        </div>
-        <h2>🎙️ منصة التفريغ والقص الذكي</h2>
-        
+        <!-- قسم الرفع -->
         <div class="form-group">
-            <label for="audioFile">📁 اختر ملف الصوت:</label>
+            <label>اختر الملف الصوتي:</label>
             <input type="file" id="audioFile" accept="audio/*">
         </div>
 
-        <button class="btn-upload" onclick="uploadFile()">رفع الملف للسيرفر ⬆️</button>
-        <div id="uploadLoader" class="loader" style="color: var(--warning-orange);">⏳ جاري رفع الملف، يرجى الانتظار...</div>
+        <button onclick="uploadFile()">بدء رفع الملف ⬆️</button>
 
-        <hr class="divider">
-
-        <div class="form-group">
-            <label for="fileId">🔑 معرف الملف (File ID):</label>
-            <input type="text" id="fileId" placeholder="سيظهر هنا تلقائياً بعد رفع الملف">
+        <!-- شريط التقدم -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-text">
+                <span id="uploadStatus">جاري الرفع...</span>
+                <span id="uploadPercentage">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div style="text-align: left; font-size: 12px; margin-top: 5px; color: var(--text-light);" id="uploadMBs">0 MB / 0 MB</div>
         </div>
 
-        <div class="form-group">
-            <label for="startTime">⏱️ وقت البداية (بالثواني):</label>
-            <input type="number" id="startTime" value="0">
+        <div id="uploadMessage" class="message"></div>
+
+        <!-- قائمة الملفات المرفوعة مسبقاً -->
+        <div class="files-list" id="filesListContainer">
+            <h3 style="margin-top: 0; color: var(--text-dark);">📁 الملفات الجاهزة للتفريغ:</h3>
+            <div id="filesList">
+                <p style="text-align: center; color: var(--text-light); font-size: 14px;">جاري تحميل القائمة...</p>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="duration">⏳ المدة المطلوبة (بالثواني):</label>
-            <input type="number" id="duration" value="60">
-        </div>
-
-        <button class="btn-process" onclick="trimAndTranscribe()">قص وتفريغ عبر الذكاء الاصطناعي 🚀</button>
-        <div id="processLoader" class="loader" style="color: var(--sky-blue);">🤖 جاري قص الصوت ومعالجته عبر نموذج Gemini...</div>
-
-        <div class="result-box" id="resultBox">✨ النتائج والتفاصيل ستظهر هنا...</div>
+        
+        <!-- قسم عرض نتيجة التفريغ -->
+        <div id="transcriptionResult" class="transcription-result"></div>
     </div>
 
     <script>
-        // رابط سيرفرك الصحيح والمحدث على Railway
-        const SERVER_URL = 'https://responsible-strength-production-4f5d.up.railway.app';
+        const SERVER_URL = 'https://responsible-strength-production-4f5d.up.railway.app'; // تأكد من الرابط
 
-        async function uploadFile() {
+        // تحميل قائمة الملفات عند فتح الصفحة
+        window.onload = loadFiles;
+
+        function showMessage(elementId, text, isSuccess) {
+            const el = document.getElementById(elementId);
+            el.innerText = text;
+            el.className = 'message ' + (isSuccess ? 'msg-success' : 'msg-error');
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 6000);
+        }
+
+        // دالة الرفع مع شريط تقدم حقيقي
+        function uploadFile() {
             const fileInput = document.getElementById('audioFile');
-            const loader = document.getElementById('uploadLoader');
-            const resultBox = document.getElementById('resultBox');
-
             if (fileInput.files.length === 0) {
-                alert('الرجاء اختيار ملف صوتي أولاً!');
+                alert('الرجاء اختيار ملف أولاً.');
                 return;
             }
 
+            const file = fileInput.files[0];
             const formData = new FormData();
-            formData.append('audioFile', fileInput.files[0]);
+            formData.append('audioFile', file);
 
-            loader.style.display = 'block';
-            resultBox.innerText = 'جاري رفع الملف إلى السيرفر... 🔄';
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const uploadPercentage = document.getElementById('uploadPercentage');
+            const uploadMBs = document.getElementById('uploadMBs');
+            const uploadStatus = document.getElementById('uploadStatus');
 
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
+            uploadPercentage.innerText = '0%';
+            uploadStatus.innerText = 'جاري الرفع...';
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${SERVER_URL}/api/upload`, true);
+
+            // تتبع تقدم الرفع
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
+                    const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+
+                    progressFill.style.width = percentComplete + '%';
+                    uploadPercentage.innerText = percentComplete + '%';
+                    uploadMBs.innerText = `${loadedMB} MB / ${totalMB} MB`;
+                }
+            };
+
+            xhr.onload = function() {
+                setTimeout(() => progressContainer.style.display = 'none', 2000);
+                
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.success) {
+                        uploadStatus.innerText = 'اكتمل الرفع بنجاح!';
+                        showMessage('uploadMessage', '✅ تم رفع الملف بنجاح!', true);
+                        fileInput.value = ''; // تصفير الحقل
+                        loadFiles(); // تحديث القائمة فوراً
+                    } else {
+                        showMessage('uploadMessage', '❌ خطأ: ' + (response.error || 'فشل الرفع'), false);
+                    }
+                } catch (err) {
+                    showMessage('uploadMessage', '❌ خطأ في السيرفر', false);
+                }
+            };
+
+            xhr.onerror = function() {
+                progressContainer.style.display = 'none';
+                showMessage('uploadMessage', '❌ فشل الاتصال بالسيرفر. تأكد من عمل السيرفر.', false);
+            };
+
+            xhr.send(formData);
+        }
+
+        // جلب الملفات المرفوعة
+        async function loadFiles() {
+            const listDiv = document.getElementById('filesList');
             try {
-                const response = await fetch(`${SERVER_URL}/api/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+                const response = await fetch(`${SERVER_URL}/api/files`);
                 const data = await response.json();
-                loader.style.display = 'none';
-
+                
                 if (data.success) {
-                    document.getElementById('fileId').value = data.fileId;
-                    resultBox.innerText = `✅ ${data.message}\n📌 معرف الملف: ${data.fileId}`;
-                } else {
-                    resultBox.innerText = '❌ خطأ: ' + data.error;
+                    if(data.files.length === 0) {
+                        listDiv.innerHTML = '<p style="text-align: center; color: var(--text-light);">لا توجد ملفات مرفوعة حالياً.</p>';
+                        return;
+                    }
+
+                    listDiv.innerHTML = data.files.map(file => `
+                        <div class="file-item">
+                            <div class="file-info">
+                                <div class="file-name">${file.filename}</div>
+                                <div class="file-meta">الحجم: ${file.size}</div>
+                                
+                                <select id="lang-${file.filename}" style="margin-top: 10px; padding: 6px; font-size: 13px;">
+                                    <option value="اللغة العربية الفصحى">العربية (فصحى)</option>
+                                    <option value="اللهجة اليمنية الدارجة" selected>العربية (اللهجة اليمنية)</option>
+                                    <option value="اللهجة المصرية">العربية (المصرية)</option>
+                                    <option value="اللهجة الخليجية">العربية (الخليجية)</option>
+                                    <option value="اللغة الإنجليزية (English)">الإنجليزية (English)</option>
+                                </select>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn-small btn-green" onclick="transcribeFile('${file.filename}')" id="btn-trans-${file.filename}">تفريغ 🤖</button>
+                            </div>
+                        </div>
+                    `).join('');
                 }
             } catch (err) {
-                loader.style.display = 'none';
-                resultBox.innerText = '❌ خطأ في الاتصال بالسيرفر: ' + err.message;
+                listDiv.innerHTML = '<p style="color: red; text-align: center;">خطأ في الاتصال بالسيرفر لجلب الملفات.</p>';
             }
         }
 
-        async function trimAndTranscribe() {
-            const fileId = document.getElementById('fileId').value;
-            const startTime = document.getElementById('startTime').value;
-            const duration = document.getElementById('duration').value;
-            const loader = document.getElementById('processLoader');
-            const resultBox = document.getElementById('resultBox');
-
-            if (!fileId) {
-                alert('الرجاء رفع ملف أو كتابة معرف الملف (File ID) أولاً!');
-                return;
-            }
-
-            loader.style.display = 'block';
-            resultBox.innerText = 'جاري قص الصوت وإرساله لنموذج Gemini للتفريغ الفوري... 🎧';
+        // التفريغ
+        async function transcribeFile(filename) {
+            const btn = document.getElementById(`btn-trans-${filename}`);
+            const lang = document.getElementById(`lang-${filename}`).value;
+            const resultBox = document.getElementById('transcriptionResult');
+            
+            btn.innerText = 'جاري التفريغ...';
+            btn.disabled = true;
+            resultBox.style.display = 'none';
 
             try {
-                const response = await fetch(`${SERVER_URL}/api/trim-and-transcribe/${fileId}`, {
+                const response = await fetch(`${SERVER_URL}/api/transcribe`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ startTime: Number(startTime), duration: Number(duration) })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename, language: lang })
                 });
+                
                 const data = await response.json();
-                loader.style.display = 'none';
-
+                
                 if (data.success) {
-                    resultBox.innerText = JSON.stringify(data.data, null, 2);
+                    const text = data.text;
+                    resultBox.innerHTML = `
+                        <h4 style="margin-top:0; color: var(--primary);">نتيجة التفريغ:</h4>
+                        <div>${text}</div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button class="btn-small" onclick="exportFile('${encodeURIComponent(text)}', 'txt')">تصدير Text 📄</button>
+                            <button class="btn-small" style="background: #2563eb;" onclick="exportFile('${encodeURIComponent(text)}', 'doc')">تصدير Word 📝</button>
+                        </div>
+                    `;
+                    resultBox.style.display = 'block';
+                    resultBox.scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    resultBox.innerText = '❌ خطأ: ' + data.error;
+                    alert('خطأ في التفريغ: ' + data.error);
                 }
             } catch (err) {
-                loader.style.display = 'none';
-                resultBox.innerText = '❌ خطأ في المعالجة: ' + err.message;
+                alert('خطأ في الاتصال أثناء التفريغ.');
+            } finally {
+                btn.innerText = 'تفريغ 🤖';
+                btn.disabled = false;
             }
+        }
+
+        // التصدير للصيغ المختلفة
+        function exportFile(encodedText, type) {
+            const text = decodeURIComponent(encodedText);
+            let blob, filename;
+
+            if (type === 'txt') {
+                blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                filename = 'Transcription.txt';
+            } else if (type === 'doc') {
+                // تصدير بسيط يدعمه Word
+                const htmlContent = `
+                    <html dir="rtl"><head><meta charset="utf-8"></head>
+                    <body style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
+                        ${text.replace(/\n/g, '<br>')}
+                    </body></html>
+                `;
+                blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+                filename = 'Transcription.doc';
+            }
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
         }
     </script>
 </body>
