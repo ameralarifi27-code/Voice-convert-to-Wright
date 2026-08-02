@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مركز تخزين ومعالجة الصوتيات</title>
+    <title>قاعدة البيانات والتفريغ الذكي الحقيقي</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -21,65 +21,49 @@
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: var(--primary); font-size: 22px; font-weight: 800; margin: 0; }
+        .header h1 { color: var(--primary); font-size: 20px; font-weight: 800; margin: 0; }
         .container { width: 100%; max-width: 850px; background: var(--card-bg); padding: 20px; border-radius: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
         input[type="file"], select { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 13px; background: #f9fafb; outline: none; }
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: var(--primary-hover); }
-        .progress-container { display: none; margin-top: 15px; background: #f3f4f6; border-radius: 8px; padding: 12px; border: 1px solid var(--border); }
-        .progress-bar { width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-        .progress-text { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; }
         .message { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; display: none; font-size: 13px; }
         .msg-success { background: #d1fae5; color: var(--success); }
         .msg-error { background: #fee2e2; color: var(--error); }
         .files-list { margin-top: 20px; border-top: 2px solid var(--border); padding-top: 15px; }
-        .file-item { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; }
+        .file-item { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; }
         .file-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .file-name { font-weight: bold; color: var(--primary); font-size: 14px; word-break: break-all; }
         .file-meta { font-size: 11px; color: var(--text-light); }
-        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; margin-top: 6px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
-        .btn-small { padding: 8px; font-size: 11px; width: auto; border-radius: 6px; }
+        .tools-grid { display: flex; gap: 6px; margin-top: 6px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .btn-small { padding: 10px; font-size: 12px; width: 100%; border-radius: 6px; text-align: center; }
         .btn-green { background: var(--success); }
-        .btn-orange { background: #d97706; }
-        .btn-blue { background: #2563eb; }
+        .btn-red { background: var(--error); }
         .transcription-result { display: none; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 14px; max-height: 300px; overflow-y: auto; }
+        audio { width: 100%; margin-top: 6px; height: 35px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>🎙️ مركز تخزين ومعالجة الصوتيات</h1>
-        <p style="color: var(--text-light); font-size: 13px; margin: 4px 0 0 0;">سيرفر تخزين وإدارة الملفات المحلية</p>
+        <h1>🧠 قاعدة البيانات والتفريغ الذكي الحقيقي</h1>
+        <p style="color: var(--text-light); font-size: 12px; margin: 4px 0 0 0;">حفظ الملفات في الذاكرة المحلية مع تفريغ صوتي حقيقي وفعال</p>
     </div>
 
     <div class="container">
         <div class="form-group">
-            <label>اختر ملف صوتي للرفع والتخزين:</label>
-            <input type="file" id="audioFile" accept="audio/*">
+            <label>اختر ملفاً صوتياً (لحفظه نهائياً في قاعدة البيانات المحلية):</label>
+            <input type="file" id="largeAudioFile" accept="audio/*">
         </div>
 
-        <button onclick="uploadFile()">رفع وتخزين الملف بالسيرفر ⬆️</button>
-
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-text">
-                <span id="uploadStatus">جاري الرفع...</span>
-                <span id="uploadPercentage">0%</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div style="font-size: 10px; margin-top: 4px; color: var(--text-light);" id="uploadMBs">0 MB / 0 MB</div>
-        </div>
-
-        <div id="uploadMessage" class="message"></div>
+        <button onclick="storeLargeFile()">حفظ في قاعدة البيانات الدائمة 💾</button>
+        <div id="msgBox" class="message"></div>
 
         <div class="files-list">
-            <h3 style="margin-top: 0; font-size: 15px;">📂 قائمة الملفات المخزنة على السيرفر:</h3>
-            <div id="filesList">
-                <p id="loadingFilesText" style="text-align: center; color: var(--text-light); font-size: 12px;">جاري جلب الملفات...</p>
+            <h3 style="margin-top: 0; font-size: 14px;">📂 الملفات المحفوظة والتفريغ الذكي:</h3>
+            <div id="persistentFilesList">
+                <p style="text-align: center; color: var(--text-light); font-size: 12px;">جاري فحص الذاكرة الدائمة...</p>
             </div>
         </div>
 
@@ -87,202 +71,216 @@
     </div>
 
     <script>
-        const SERVER_URL = "";
+        let db;
+        const dbName = "SmartAudioDatabaseReal_V3";
+        const storeName = "files";
 
-        window.onload = function() {
-            loadFiles();
-        };
-
-        function showMessage(id, text, success) {
-            const el = document.getElementById(id);
-            el.innerText = text;
-            el.className = 'message ' + (success ? 'msg-success' : 'msg-error');
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 4000);
+        async function requestPersistentStorage() {
+            if (navigator.storage && navigator.storage.persist) {
+                const isPersisted = await navigator.storage.persisted();
+                if (!isPersisted) {
+                    await navigator.storage.persist();
+                }
+            }
         }
 
-        function uploadFile() {
-            const fileInput = document.getElementById('audioFile');
-            if (fileInput.files.length === 0) {
-                alert('الرجاء اختيار ملف أولاً.');
+        const request = indexedDB.open(dbName, 1);
+
+        request.onerror = function(event) {
+            console.error("خطأ في قاعدة البيانات", event);
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            requestPersistentStorage();
+            loadPersistentFiles();
+        };
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+            }
+        };
+
+        function showMessage(text, success) {
+            const box = document.getElementById('msgBox');
+            box.innerText = text;
+            box.className = 'message ' + (success ? 'msg-success' : 'msg-error');
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 4000);
+        }
+
+        function storeLargeFile() {
+            const input = document.getElementById('largeAudioFile');
+            if (input.files.length === 0) {
+                alert('الرجاء اختيار ملف صوتي أولاً.');
                 return;
             }
 
-            const file = fileInput.files[0];
-            const formData = new FormData();
-            formData.append('audioFile', file);
+            const file = input.files[0];
+            showMessage('⏳ جاري حفظ الملف في الذاكرة الدائمة...', true);
 
-            const progressContainer = document.getElementById('progressContainer');
-            const progressFill = document.getElementById('progressFill');
-            const uploadPercentage = document.getElementById('uploadPercentage');
-            const uploadMBs = document.getElementById('uploadMBs');
-
-            progressContainer.style.display = 'block';
-            progressFill.style.width = '0%';
-            uploadPercentage.innerText = '0%';
-
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `${SERVER_URL}/api/upload`, true);
-
-            xhr.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                    const pct = Math.round((e.loaded / e.total) * 100);
-                    const loaded = (e.loaded / (1024*1024)).toFixed(2);
-                    const total = (e.total / (1024*1024)).toFixed(2);
-                    progressFill.style.width = pct + '%';
-                    uploadPercentage.innerText = pct + '%';
-                    uploadMBs.innerText = `${loaded} MB / ${total} MB`;
-                }
+            const transaction = db.transaction([storeName], "readwrite");
+            const store = transaction.objectStore(storeName);
+            
+            const fileRecord = {
+                name: file.name,
+                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+                fileObject: file,
+                date: new Date().toLocaleString()
             };
 
-            xhr.onload = function() {
-                setTimeout(() => progressContainer.style.display = 'none', 1000);
-                try {
-                    const res = JSON.parse(xhr.responseText);
-                    if (xhr.status === 200 && res.success) {
-                        showMessage('uploadMessage', '✅ تم تخزين الملف بنجاح!', true);
-                        fileInput.value = '';
-                        loadFiles();
-                    } else {
-                        showMessage('uploadMessage', '❌ خطأ: ' + (res.error || 'فشل الرفع'), false);
-                    }
-                } catch {
-                    showMessage('uploadMessage', '❌ خطأ في استجابة السيرفر', false);
-                }
+            const req = store.add(fileRecord);
+
+            req.onsuccess = function() {
+                showMessage('✅ تم حفظ الملف بنجاح ولن تحتاج لرفعه مرة أخرى!', true);
+                input.value = '';
+                loadPersistentFiles();
             };
 
-            xhr.onerror = () => {
-                progressContainer.style.display = 'none';
-                showMessage('uploadMessage', '❌ فشل الاتصال بالسيرفر', false);
+            req.onerror = function() {
+                showMessage('❌ فشل الحفظ. مساحة التخزين قد تكون غير كافية.', false);
             };
-
-            xhr.send(formData);
         }
 
-        async function loadFiles() {
-            const listDiv = document.getElementById('filesList');
-            try {
-                const res = await fetch(`${SERVER_URL}/api/files`);
-                const data = await res.json();
-                
-                if (data.success) {
-                    if (data.files.length === 0) {
-                        listDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); font-size:12px;">لا توجد ملفات مخزنة حالياً.</p>';
-                        return;
-                    }
+        function loadPersistentFiles() {
+            const listDiv = document.getElementById('persistentFilesList');
+            if (!db) return;
 
-                    listDiv.innerHTML = data.files.map(file => `
+            const transaction = db.transaction([storeName], "readonly");
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+
+            request.onsuccess = function(event) {
+                const records = event.target.result;
+                if (records.length === 0) {
+                    listDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); font-size:12px;">لا توجد ملفات محفوظة حالياً.</p>';
+                    return;
+                }
+
+                listDiv.innerHTML = records.map(item => {
+                    const blobUrl = URL.createObjectURL(item.fileObject);
+                    const safeId = item.id;
+
+                    return `
                         <div class="file-item">
                             <div class="file-header">
                                 <div>
-                                    <div class="file-name">${file.filename}</div>
-                                    <div class="file-meta">الحجم: ${file.size}</div>
+                                    <div class="file-name">${item.name}</div>
+                                    <div class="file-meta">الحجم: ${item.size} | الحفظ: ${item.date}</div>
                                 </div>
-                                <select id="lang-${file.filename}" style="width: 140px; padding: 5px; font-size: 11px;">
-                                    <option value="اللغة العربية الفصحى">عربي (فصحى)</option>
-                                    <option value="اللهجة اليمنية الدارجة" selected>عربي (لهجة يمنية)</option>
-                                    <option value="اللهجة المصرية">عربي (مصرية)</option>
-                                    <option value="اللغة الإنجليزية (English)">English</option>
+                                <button class="btn-small btn-red" onclick="deleteRecord(${safeId})" style="width:auto; padding:4px 8px; font-size:10px;">حذف 🗑️</button>
+                            </div>
+
+                            <audio id="audio-${safeId}" controls src="${blobUrl}"></audio>
+
+                            <div style="margin-top: 6px;">
+                                <label style="font-size: 11px; margin-bottom: 4px;">اختر لغة التفريغ:</label>
+                                <select id="lang-${safeId}" style="padding: 6px; font-size: 11px;">
+                                    <option value="ar-SA">العربية (السعودية / فصحى)</option>
+                                    <option value="ar-YE" selected>العربية (اللهجة اليمنية)</option>
+                                    <option value="ar-EG">العربية (اللهجة المصرية)</option>
+                                    <option value="en-US">English</option>
                                 </select>
                             </div>
 
                             <div class="tools-grid">
-                                <button class="btn-small btn-green" onclick="transcribe('${file.filename}')" id="btn-t-${file.filename}">تفريغ ذكي 🤖</button>
-                                <button class="btn-small btn-orange" onclick="convertFormat('${file.filename}', 'mp3')">تحويل MP3 🎵</button>
-                                <button class="btn-small btn-orange" onclick="convertFormat('${file.filename}', 'm4a')">تحويل M4A 🎧</button>
-                                <button class="btn-small btn-blue" onclick="promptTrim('${file.filename}')">قص الصوت ✂️</button>
+                                <button class="btn-small btn-green" onclick="realTranscribe(${safeId})" id="btn-t-${safeId}">تفريغ ذكي حقيقي 🤖</button>
                             </div>
                         </div>
-                    `).join('');
-                }
-            } catch {
-                listDiv.innerHTML = '<p style="color: var(--error); text-align: center; font-size:12px;">تعذر الاتصال بالسيرفر لجلب الملفات.</p>';
-            }
+                    `;
+                }).join('');
+            };
         }
 
-        async function transcribe(filename) {
-            const btn = document.getElementById(`btn-t-${filename}`);
-            const lang = document.getElementById(`lang-${filename}`).value;
+        // تنفيذ التفريغ الذكي الحقيقي عبر تشغيل الصوت واستماع المتصفح له محلياً
+        function realTranscribe(id) {
+            const btn = document.getElementById(`btn-t-${id}`);
+            const langSelect = document.getElementById(`lang-${id}`).value;
+            const audioEl = document.getElementById(`audio-${id}`);
             const resBox = document.getElementById('transcriptionResult');
 
-            btn.innerText = 'جاري...';
-            btn.disabled = true;
-            resBox.style.display = 'none';
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('متصفحك لا يدعم ميزة التفريغ الصوتي المباشر. يجدر استخدام متصفح كروم حديث.');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = langSelect;
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            let fullText = "";
+
+            recognition.onstart = function() {
+                btn.innerText = '🔴 جاري الاستماع والتفريغ الفعلي...';
+                btn.style.background = '#dc2626';
+                btn.disabled = true;
+                audioEl.currentTime = 0;
+                audioEl.play(); // تشغيل الصوت لكي يلتقطه نظام التعرف على الصوت في المتصفح
+                resBox.style.display = 'block';
+                resBox.innerHTML = '<h4 style="margin-top:0; color:var(--primary); font-size:14px;">جاري كتابة التفريغ...</h4><div id="live-text"></div>';
+            };
+
+            recognition.onresult = function(event) {
+                let interim = "";
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        fullText += event.results[i][0].transcript + " ";
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+                document.getElementById('live-text').innerText = fullText + interim;
+            };
+
+            recognition.onerror = function(event) {
+                console.error("خطأ في التفريغ:", event.error);
+            };
+
+            recognition.onend = function() {
+                audioEl.pause();
+                btn.innerText = 'تفريغ ذكي حقيقي 🤖';
+                btn.style.background = '';
+                btn.disabled = false;
+
+                if (fullText.trim() === "") {
+                    fullText = "لم يتم التقاط كلمات بوضوح، تأكد من وضوح الصوت أو رفع الصوت.";
+                }
+
+                resBox.innerHTML = `
+                    <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الاحترافي النهائي:</h4>
+                    <div>${fullText}</div>
+                    <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button class="btn-small" style="background:var(--primary);" onclick="exportDoc('${encodeURIComponent(fullText)}', 'txt')">تصدير Text 📄</button>
+                        <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(fullText)}', 'doc')">تصدير Word 📝</button>
+                        <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(fullText)}')">تصدير PDF 📑</button>
+                    </div>
+                `;
+                resBox.scrollIntoView({ behavior: 'smooth' });
+            };
 
             try {
-                const res = await fetch(`${SERVER_URL}/api/transcribe`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename, language: lang })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    const txt = data.text;
-                    resBox.innerHTML = `
-                        <h4 style="margin-top:0; color:var(--primary); font-size:14px;">نتيجة التفريغ الاحترافي:</h4>
-                        <div>${txt}</div>
-                        <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button class="btn-small" onclick="exportDoc('${encodeURIComponent(txt)}', 'txt')">تصدير Text 📄</button>
-                            <button class="btn-small" style="background:#2563eb;" onclick="exportDoc('${encodeURIComponent(txt)}', 'doc')">تصدير Word 📝</button>
-                            <button class="btn-small" style="background:#dc2626;" onclick="exportPDF('${encodeURIComponent(txt)}')">تصدير PDF 📑</button>
-                        </div>
-                    `;
-                    resBox.style.display = 'block';
-                    resBox.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert('خطأ: ' + data.error);
-                }
-            } catch {
-                alert('حدث خطأ أثناء التفريغ.');
-            } finally {
-                btn.innerText = 'تفريغ ذكي 🤖';
+                recognition.start();
+            } catch (e) {
+                alert('حدث استثناء أثناء بدء التفريغ.');
+                btn.innerText = 'تفريغ ذكي حقيقي 🤖';
+                btn.style.background = '';
                 btn.disabled = false;
             }
         }
 
-        async function convertFormat(filename, format) {
-            if(!confirm(`تحويل إلى ${format.toUpperCase()}؟`)) return;
-            try {
-                const res = await fetch(`${SERVER_URL}/api/process-audio`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename, action: 'convert', targetFormat: format })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    alert('✅ تمت المعالجة بنجاح! سيتم التحميل الآن.');
-                    window.location.href = SERVER_URL + data.downloadUrl;
-                } else {
-                    alert('خطأ: ' + data.error);
-                }
-            } catch {
-                alert('فشل الاتصال.');
-            }
-        }
+        function deleteRecord(id) {
+            if (!confirm('هل تريد حذف هذا الملف من الذاكرة الدائمة؟')) return;
+            const transaction = db.transaction([storeName], "readwrite");
+            const store = transaction.objectStore(storeName);
+            const req = store.delete(id);
 
-        async function promptTrim(filename) {
-            const start = prompt('وقت البداية بالثواني (مثلاً 0):', '0');
-            if(start === null) return;
-            const duration = prompt('المدة المطلوبة بالثواني (مثلاً 30):', '30');
-            if(duration === null) return;
-
-            try {
-                const res = await fetch(`${SERVER_URL}/api/process-audio`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename, action: 'trim', startTime: Number(start), duration: Number(duration), targetFormat: 'mp3' })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    alert('✅ تم القص بنجاح! سيتم التحميل.');
-                    window.location.href = SERVER_URL + data.downloadUrl;
-                } else {
-                    alert('خطأ: ' + data.error);
-                }
-            } catch {
-                alert('فشل الاتصال.');
-            }
+            req.onsuccess = function() {
+                loadPersistentFiles();
+            };
         }
 
         function exportDoc(encoded, type) {
