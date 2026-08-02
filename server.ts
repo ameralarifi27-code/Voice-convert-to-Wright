@@ -4,6 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import { GoogleGenAI } from '@google/genai';
+import { fileURLToPath } from 'url';
+
+// حل مشكلة __dirname في بيئة ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
